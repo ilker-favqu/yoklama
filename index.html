@@ -191,9 +191,11 @@
   .cal-cell.holiday-full{background:var(--holiday-soft);color:var(--holiday);}
   .cal-cell.holiday-half{background:linear-gradient(115deg, var(--holiday-soft) 50%, var(--surface) 50%);}
   .cal-dots{position:absolute;bottom:2px;display:flex;gap:2.5px;}
-  .cal-dots .mini-ph{width:13px;height:13px;border-radius:50%;object-fit:cover;}
-  .mini-ilker{box-shadow:0 0 0 1.4px var(--ilker);}
-  .mini-ceren{box-shadow:0 0 0 1.4px var(--ceren);}
+  .mini-dot{position:relative;width:13px;height:13px;border-radius:50%;display:inline-block;flex:0 0 auto;}
+  .mini-dot img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
+  .mini-dot.mini-ilker{box-shadow:0 0 0 1.4px var(--ilker);}
+  .mini-dot.mini-ceren{box-shadow:0 0 0 1.4px var(--ceren);}
+  .mini-dot.status-half img{clip-path: inset(0 50% 0 0);}
 
   .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:var(--ink-soft);}
   .legend span{display:inline-flex;align-items:center;gap:5px;}
@@ -347,7 +349,7 @@
 <script type="module">
 /* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA4Dmv37GUUBwOiYQjaXZbLc1Gre1L8gf4",
@@ -359,7 +361,8 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
-const stateDocRef = doc(db, "yoklama", "shared-state");
+const configDocRef = doc(db, "yoklama-config", "shared");
+const attendanceColRef = collection(db, "yoklama-attendance");
 
 /* ================= DATA ================= */
 const TR_DOW = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
@@ -392,44 +395,73 @@ let ui = {
   holidayForm:{date:'', name:'', half:false},
 };
 
-let suppressNextSnapshot = false;
-let firstLoadDone = false;
+let configLoaded = false;
+let attendanceLoaded = false;
 
-/* ================= STORAGE (Firestore) ================= */
-async function loadState(){
-  try{
-    const snap = await getDoc(stateDocRef);
+/* ================= STORAGE (Firestore) =================
+   Her gün+ders kaydı KENDİ belgesinde saklanır (yoklama-attendance
+   koleksiyonu). Böylece iki telefon aynı anda farklı günlere veri
+   girse bile birbirinin kaydını SİLMEZ/ÜSTÜNE YAZMAZ — her yazma
+   işlemi sadece kendi belgesine dokunur. Dersler/tatiller (nadiren
+   değişen, küçük veri) tek bir belgede (yoklama-config/shared) tutulur. */
+function startSync(){
+  onSnapshot(configDocRef, (snap)=>{
     if(snap.exists()){
       const data = snap.data();
-      if(data && data.json){
-        const parsed = JSON.parse(data.json);
-        state = Object.assign({courses:[],holidays:DEFAULT_HOLIDAYS,attendance:{}}, parsed);
-      }
+      state.courses = (data && data.courses) || [];
+      state.holidays = (data && data.holidays && data.holidays.length) ? data.holidays : DEFAULT_HOLIDAYS;
     }else{
-      await setDoc(stateDocRef, { json: JSON.stringify(state) });
+      setDoc(configDocRef, { courses: [], holidays: DEFAULT_HOLIDAYS }).catch(e=>console.error('İlk ayar kaydı hatası', e));
+      state.courses = [];
+      state.holidays = DEFAULT_HOLIDAYS;
     }
-  }catch(e){ console.error('Firestore okuma hatası', e); }
-  firstLoadDone = true;
-  render();
+    configLoaded = true;
+    render();
+  }, (err)=>console.error('Ayar senkron hatası', err));
 
-  // Diğer telefondaki değişiklikleri anlık yakala
-  onSnapshot(stateDocRef, (snap)=>{
-    if(!firstLoadDone) return;
-    if(suppressNextSnapshot){ suppressNextSnapshot = false; return; }
-    if(snap.exists()){
-      const data = snap.data();
-      if(data && data.json){
-        state = Object.assign({courses:[],holidays:DEFAULT_HOLIDAYS,attendance:{}}, JSON.parse(data.json));
-        render();
-      }
-    }
-  });
+  onSnapshot(attendanceColRef, (snap)=>{
+    const next = {};
+    snap.forEach(docSnap=>{
+      const d = docSnap.data();
+      if(!d || !d.date || !d.courseId) return;
+      if(!next[d.date]) next[d.date] = {};
+      next[d.date][d.courseId] = { ilker: d.ilker||0, ceren: d.ceren||0 };
+    });
+    state.attendance = next;
+    attendanceLoaded = true;
+    render();
+  }, (err)=>console.error('Devamsızlık senkron hatası', err));
 }
-async function saveState(){
+
+async function writeAttendanceField(ds, courseId, person, value){
+  const docId = ds + '__' + courseId;
   try{
-    suppressNextSnapshot = true;
-    await setDoc(stateDocRef, { json: JSON.stringify(state) });
-  }catch(e){ console.error('Kaydetme hatası', e); }
+    await setDoc(doc(db, "yoklama-attendance", docId), { date: ds, courseId, [person]: value }, { merge: true });
+  }catch(e){ console.error('Devamsızlık kaydı hatası', e); }
+}
+async function writeConfig(){
+  try{
+    await setDoc(configDocRef, { courses: state.courses, holidays: state.holidays });
+  }catch(e){ console.error('Ayar kaydı hatası', e); }
+}
+async function deleteCourseEverywhere(courseId){
+  state.courses = state.courses.filter(c=>c.id!==courseId);
+  writeConfig();
+  try{
+    const q = query(attendanceColRef, where("courseId","==",courseId));
+    const snap = await getDocs(q);
+    const dels = [];
+    snap.forEach(d=>dels.push(deleteDoc(d.ref)));
+    await Promise.all(dels);
+  }catch(e){ console.error('Derse ait devamsızlık kayıtları silinemedi', e); }
+}
+async function clearAllAttendance(){
+  try{
+    const snap = await getDocs(attendanceColRef);
+    const dels = [];
+    snap.forEach(d=>dels.push(deleteDoc(d.ref)));
+    await Promise.all(dels);
+  }catch(e){ console.error('Toplu silme hatası', e); }
 }
 
 /* ================= HELPERS ================= */
@@ -451,8 +483,8 @@ function setEntry(ds,courseId,person,value){
   }else{
     state.attendance[ds][courseId] = cur;
   }
-  saveState();
   render();
+  writeAttendanceField(ds, courseId, person, value);
 }
 function courseTotals(courseId){
   let ilker=0, ceren=0;
@@ -462,12 +494,16 @@ function courseTotals(courseId){
   }
   return {ilker, ceren};
 }
-function dayHasEntries(ds){
+function dayStatus(ds){
   const day = state.attendance[ds];
-  if(!day) return {ilker:false, ceren:false};
-  let ilker=false, ceren=false;
-  for(const cid in day){ if(day[cid].ilker>0) ilker=true; if(day[cid].ceren>0) ceren=true; }
-  return {ilker, ceren};
+  if(!day) return {ilker:'none', ceren:'none'};
+  let ilkerMax=0, cerenMax=0;
+  for(const cid in day){
+    ilkerMax = Math.max(ilkerMax, day[cid].ilker||0);
+    cerenMax = Math.max(cerenMax, day[cid].ceren||0);
+  }
+  const toStatus = v => v>=1 ? 'full' : v>0 ? 'half' : 'none';
+  return { ilker: toStatus(ilkerMax), ceren: toStatus(cerenMax) };
 }
 function fmtNum(n){
   return (Math.round(n*10)/10).toString().replace('.', ',');
@@ -562,7 +598,7 @@ function renderCalendarTab(){
     const today = new Date();
     const isToday = ds === dstr(today.getFullYear(), today.getMonth(), today.getDate());
     const hasCourses = coursesForWeekday(dow).length > 0;
-    const dots = dayHasEntries(ds);
+    const dots = dayStatus(ds);
 
     let cls = 'cal-cell';
     if(isToday) cls += ' today';
@@ -571,7 +607,7 @@ function renderCalendarTab(){
 
     cells += `<button class="${cls}" data-action="open-day" data-date="${ds}" title="${hol?hol.name:''}">
       <span>${dayNum}</span>
-      <span class="cal-dots">${dots.ilker?`<img class="mini-ph mini-ilker" src="${ILKER_PHOTO}" alt="">`:''}${dots.ceren?`<img class="mini-ph mini-ceren" src="${CEREN_PHOTO}" alt="">`:''}</span>
+      <span class="cal-dots">${dots.ilker!=='none'?`<span class="mini-dot mini-ilker status-${dots.ilker}"><img src="${ILKER_PHOTO}" alt=""></span>`:''}${dots.ceren!=='none'?`<span class="mini-dot mini-ceren status-${dots.ceren}"><img src="${CEREN_PHOTO}" alt=""></span>`:''}</span>
     </button>`;
   }
 
@@ -823,7 +859,7 @@ function attachOnce(){
         limit: ui.courseForm.limit ? parseFloat(ui.courseForm.limit) : 0
       });
       ui.courseForm = {name:'', days:[], limit:''};
-      saveState(); render();
+      writeConfig(); render();
     }
     else if(action==='delete-course'){
       const course = state.courses.find(c=>c.id===t.dataset.id);
@@ -841,11 +877,11 @@ function attachOnce(){
         date:ui.holidayForm.date, name:ui.holidayForm.name.trim(), half:ui.holidayForm.half
       });
       ui.holidayForm = {date:'', name:'', half:false};
-      saveState(); render();
+      writeConfig(); render();
     }
     else if(action==='delete-holiday'){
       state.holidays = state.holidays.filter(h=>h.id!==t.dataset.id);
-      saveState(); render();
+      writeConfig(); render();
     }
     else if(action==='reset-attendance'){
       ui.confirmDialog = {
@@ -861,25 +897,22 @@ function attachOnce(){
       if(cd){
         if(cd.action==='clear-att'){
           const {ds,cid,person} = cd.payload;
-          if(state.attendance[ds] && state.attendance[ds][cid]){
-            state.attendance[ds][cid][person] = 0;
-            const e = state.attendance[ds][cid];
+          const e = getEntry(ds, cid);
+          e[person] = 0;
+          if(state.attendance[ds]){
             if(e.ilker===0 && e.ceren===0){
               delete state.attendance[ds][cid];
               if(Object.keys(state.attendance[ds]).length===0) delete state.attendance[ds];
+            }else{
+              state.attendance[ds][cid] = e;
             }
           }
-          saveState();
+          writeAttendanceField(ds, cid, person, 0);
         }else if(cd.action==='delete-course'){
-          state.courses = state.courses.filter(c=>c.id!==cd.payload.id);
-          for(const ds in state.attendance){
-            if(state.attendance[ds][cd.payload.id]) delete state.attendance[ds][cd.payload.id];
-            if(Object.keys(state.attendance[ds]).length===0) delete state.attendance[ds];
-          }
-          saveState();
+          deleteCourseEverywhere(cd.payload.id);
         }else if(cd.action==='reset-attendance'){
           state.attendance = {};
-          saveState();
+          clearAllAttendance();
         }
       }
       ui.confirmDialog = null;
@@ -913,7 +946,7 @@ function shiftMonth(delta){
 }
 
 /* ================= INIT ================= */
-loadState();
+startSync();
 </script>
 </body>
 </html>

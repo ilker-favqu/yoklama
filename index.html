@@ -417,7 +417,7 @@ function startSync(){
     }
     configLoaded = true;
     render();
-  }, (err)=>console.error('Ayar senkron hatası', err));
+  }, (err)=>{ console.error('Ayar senkron hatası', err); syncError = (err && err.message) || String(err); render(); });
 
   onSnapshot(attendanceColRef, (snap)=>{
     const next = {};
@@ -430,7 +430,7 @@ function startSync(){
     state.attendance = next;
     attendanceLoaded = true;
     render();
-  }, (err)=>console.error('Devamsızlık senkron hatası', err));
+  }, (err)=>{ console.error('Devamsızlık senkron hatası', err); syncError = (err && err.message) || String(err); render(); });
 }
 
 async function writeAttendanceField(ds, courseId, person, value){
@@ -529,8 +529,24 @@ const ICONS = {
 };
 
 /* ================= RENDER ================= */
+let syncError = null;
+
 function render(){
   const app = document.getElementById('app');
+  if(syncError){
+    app.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;padding:24px;text-align:center;">
+        <div>
+          <div style="font-weight:700;color:#B23A2E;margin-bottom:8px;">Veriye bağlanılamadı</div>
+          <div style="font-size:12.5px;color:#5B6660;line-height:1.5;">${syncError}</div>
+        </div>
+      </div>`;
+    return;
+  }
+  if(!configLoaded || !attendanceLoaded){
+    app.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#93998F;font-size:13px;">Yükleniyor…</div>`;
+    return;
+  }
   app.innerHTML = `
     <header class="app-header">
       ${logoSVG()}

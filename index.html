@@ -12,6 +12,8 @@
 <meta name="apple-mobile-web-app-title" content="Yoklama Defteri">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#F3F4EF">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -284,7 +286,7 @@
 
   .form-block{margin-top:10px;}
   .field-label{font-size:11.5px;font-weight:700;color:var(--ink-soft);margin:10px 0 5px;display:block;}
-  input[type=text], input[type=number], input[type=date]{
+  input[type=text], input[type=number], input[type=date], input[type=time], select{
     width:100%;border:1px solid var(--line);border-radius:var(--radius-s);padding:10px 11px;
     font-family:inherit;font-size:13.5px;background:var(--bg);color:var(--ink);
   }
@@ -295,6 +297,15 @@
     font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer;
   }
   .day-toggle.active{background:var(--ilker);border-color:var(--ilker);color:#fff;}
+  select{appearance:auto;}
+  .cal-cell .exam-badge{position:absolute;top:2px;right:3px;background:var(--danger);color:#fff;font-size:8.5px;font-weight:800;line-height:1;padding:2px 3.5px;border-radius:5px;}
+  .exam-line{display:flex;align-items:center;gap:8px;background:var(--danger-soft);color:var(--danger);border-radius:var(--radius-s);padding:9px 11px;font-size:12.5px;font-weight:700;margin-bottom:8px;}
+  .exam-next{font-size:11.5px;font-weight:700;color:var(--danger);margin:6px 0 2px;}
+  .room-tag{font-size:11px;color:var(--ink-soft);font-weight:600;margin:2px 0 0;}
+  .edit-form{background:var(--surface-alt);border-radius:var(--radius-m);padding:4px 12px 12px;margin:6px 0;}
+  .row-btns{display:flex;gap:8px;margin-top:12px;}
+  .row-btns .btn{flex:1;}
+  .icon-btn.edit{color:var(--ilker);}
   .checkbox-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;font-weight:600;}
   .checkbox-row input{width:16px;height:16px;}
   .note{font-size:11.5px;color:var(--ink-faint);margin-top:10px;line-height:1.5;}
@@ -339,6 +350,138 @@
   .seg button:last-child{border-right:none;}
   .seg button.sel-ilker{background:var(--ilker);color:#fff;}
   .seg button.sel-ceren{background:var(--ceren);color:#fff;}
+
+  /* ---------- Planlar ---------- */
+  .pl{--cor:#8FB0DD;--cor-ink:#2B4C7E;--lonca:#EE9DB8;--lonca-ink:#A8325E;--ortak:#6B4C9A;--ortak-soft:#E7DFF3;--accent:var(--ilker);--accent-soft:var(--ilker-soft);}
+  .pl[data-who="ceren"]{--accent:var(--ceren);--accent-soft:var(--ceren-soft);}
+  .pl[data-who="ilker"]{--accent:var(--ilker);--accent-soft:var(--ilker-soft);}
+  .pl[data-who="ortak"]{--accent:var(--ortak);--accent-soft:var(--ortak-soft);}
+  .pl button{font-family:inherit;cursor:pointer;}
+/* üst: kişi seçimi + başlık */
+  .pl-top{margin-bottom:14px;}
+  .pl-who-tabs{display:flex;background:var(--surface-alt);border-radius:12px;padding:3px;gap:3px;}
+  .pl-who-tabs button{flex:1;border:none;background:transparent;border-radius:9px;padding:9px 0;font-size:13.5px;font-weight:700;color:var(--ink-soft);}
+  .pl-who-tabs button.pl-active{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.12);}
+  .pl-page-title{font-family:'Fraunces',serif;font-weight:600;font-size:28px;letter-spacing:-.01em;margin:16px 0 0;color:var(--accent);}
+  .pl-page-sub{font-size:12.5px;color:var(--ink-soft);margin:2px 0 0;}
+
+
+  /* takvim */
+  .pl-cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .pl-cal-nav .pl-month{font-weight:800;font-size:15px;text-align:center;background:none;border:none;color:var(--ink);padding:6px 10px;}
+  .pl-cal-nav .pl-month small{display:block;font-size:10px;font-weight:700;color:var(--accent);}
+  .pl-chev{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink);}
+  .pl-chev svg{width:16px;height:16px;}
+  .pl-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:6px;}
+  .pl-weekdays div{text-align:center;font-size:10.5px;font-weight:700;color:var(--ink-faint);}
+  .pl-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .pl-day{aspect-ratio:1/1;position:relative;border:1px solid transparent;border-radius:9px;background:var(--surface);
+       font-size:12.5px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:8px;}
+  .pl-day.pl-blank{visibility:hidden;}
+  .pl-day.pl-today{border-color:var(--accent);color:var(--accent);}
+  .pl-day.pl-has{background:var(--accent-soft);}
+  .pl-day.pl-has.pl-late{background:var(--danger-soft);}
+  .pl-day.pl-filter{outline:2px solid var(--accent);outline-offset:-1px;}
+  .pl-day .pl-dots{position:absolute;bottom:3px;display:flex;gap:2px;}
+  .pl-day .pl-dots i{width:5px;height:5px;border-radius:50%;background:var(--accent);display:block;}
+  .pl-day .pl-dots i.pl-late{background:var(--danger);}
+  .pl-day.pl-pick-start,.pl-day.pl-pick-end{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .pl-day.pl-pick-mid{background:var(--accent-soft);border-color:var(--accent);}
+  .pl-picking .pl-day:not(.pl-blank){cursor:crosshair;}
+  .pl-day.pl-past{color:#B4B8AE;background:#ECEDE7;}
+  .pl-day.pl-past.pl-has{background:#EADDDA;}
+  .pl-day.pl-past .pl-dots i{opacity:.55;}
+  .pl-day.pl-past:disabled{cursor:not-allowed;}
+
+  /* ekleme çubuğu */
+  .pl-add-bar{display:flex;align-items:center;gap:10px;margin:16px 0 0;}
+  .pl-plus{width:40px;height:40px;border-radius:50%;border:none;background:var(--accent);color:#fff;display:grid;place-items:center;flex:0 0 auto;}
+  .pl-plus svg{width:20px;height:20px;}
+  .pl-add-bar .pl-hint{font-size:13px;color:var(--ink-soft);font-weight:600;}
+  .pl-add-form{display:flex;gap:8px;margin-top:16px;}
+  .pl-add-form input{flex:1;min-width:0;border:1.5px solid var(--accent);border-radius:var(--radius-s);padding:11px 12px;font-family:inherit;font-size:14px;background:var(--surface);color:var(--ink);}
+  .pl-add-form button{border:none;border-radius:var(--radius-s);padding:0 16px;font-weight:700;font-size:13.5px;}
+  .pl-add-form .pl-go{background:var(--accent);color:#fff;}
+  .pl-add-form .pl-go:disabled{opacity:.4;}
+  .pl-add-form .pl-cancel{background:var(--surface-alt);color:var(--ink-soft);}
+
+  .pl-pick-banner{margin-top:16px;background:var(--accent);color:#fff;border-radius:var(--radius-m);padding:12px 14px;}
+  .pl-pick-banner b{display:block;font-size:13.5px;}
+  .pl-pick-banner span{font-size:12.5px;opacity:.92;display:block;margin-top:3px;}
+  .pl-pick-banner .pl-row{display:flex;gap:8px;margin-top:10px;}
+  .pl-pick-banner button{flex:1;border:none;border-radius:var(--radius-s);padding:9px 0;font-weight:700;font-size:13px;}
+  .pl-pick-banner .pl-ok{background:#fff;color:var(--accent);}
+  .pl-pick-banner .pl-ok:disabled{opacity:.45;}
+  .pl-pick-banner .pl-skip{background:rgba(255,255,255,.2);color:#fff;}
+
+  /* liste */
+  .pl-list-head{display:flex;align-items:center;justify-content:space-between;margin:22px 0 8px;}
+  .pl-list-head h2{font-size:12.5px;font-weight:800;color:var(--ink-soft);margin:0;}
+  .pl-chip{border:none;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:11.5px;border-radius:999px;padding:5px 10px;}
+  .pl-item{display:flex;align-items:flex-start;gap:12px;background:var(--surface);border-radius:var(--radius-m);padding:12px 12px;margin-bottom:8px;}
+  .pl-check{width:24px;height:24px;border-radius:7px;border:2px solid var(--ink-faint);background:var(--surface);flex:0 0 auto;display:grid;place-items:center;margin-top:1px;padding:0;color:#fff;}
+  .pl-check svg{width:14px;height:14px;opacity:0;}
+  .pl-item.pl-done .pl-check{background:var(--accent);border-color:var(--accent);}
+  .pl-item.pl-done .pl-check svg{opacity:1;}
+  .pl-item .pl-body{flex:1;min-width:0;}
+  .pl-item .pl-txt{font-size:14.5px;font-weight:600;line-height:1.35;word-wrap:break-word;}
+  .pl-item .pl-when{display:inline-block;margin-top:5px;font-size:11.5px;font-weight:700;color:var(--ink-soft);background:var(--surface-alt);border:none;border-radius:6px;padding:3px 8px;}
+  .pl-item .pl-when.pl-none{color:var(--accent);background:var(--accent-soft);}
+  .pl-item.pl-late .pl-txt{color:var(--danger);}
+  .pl-item.pl-late .pl-when{background:var(--danger-soft);color:var(--danger);}
+  .pl-item.pl-done .pl-txt{color:var(--ink-faint);text-decoration:line-through;}
+  .pl-item.pl-done .pl-when{opacity:.6;}
+  .pl-item.pl-pinned{box-shadow:inset 4px 0 0 var(--accent);}
+  .pl-item .pl-acts{display:flex;gap:6px;flex:0 0 auto;}
+  .pl-item .pl-acts button{width:44px;height:44px;border-radius:12px;border:none;display:grid;place-items:center;padding:0;}
+  .pl-item .pl-acts svg{width:20px;height:20px;}
+  .pl-item .pl-pin{background:var(--surface-alt);color:var(--ink-soft);}
+  .pl-item .pl-pin.pl-on{background:var(--accent);color:#fff;}
+  .pl-item .pl-del{background:var(--danger-soft);color:var(--danger);}
+  .pl-item.pl-confirming{align-items:center;background:var(--danger-soft);}
+  .pl-item.pl-confirming .pl-q{flex:1;font-size:13.5px;font-weight:700;color:var(--danger);}
+  .pl-item.pl-confirming button{border:none;border-radius:10px;height:44px;padding:0 16px;font-weight:700;font-size:13.5px;}
+  .pl-item.pl-confirming .pl-no{background:var(--surface);color:var(--ink-soft);}
+  .pl-item.pl-confirming .pl-yes{background:var(--danger);color:#fff;}
+  .pl-empty{text-align:center;color:var(--ink-soft);font-size:13px;padding:22px 10px;}
+  /* oyun (Ortak) */
+  .pl-day.pl-g-cor{background:linear-gradient(45deg,var(--cor) 50%,var(--surface) 50%);}
+  .pl-day.pl-g-lonca{background:linear-gradient(45deg,var(--surface) 50%,var(--lonca) 50%);}
+  .pl-day.pl-g-cor,.pl-day.pl-g-lonca,.pl-day.pl-g-both{color:var(--ink);font-weight:800;}
+  .pl-day.pl-g-both{background:linear-gradient(45deg,var(--cor) 50%,var(--lonca) 50%);}
+  .pl-game-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:11.5px;font-weight:600;color:var(--ink-soft);}
+  .pl-game-legend span{display:flex;align-items:center;gap:6px;}
+  .pl-game-legend i{width:12px;height:12px;border-radius:4px;display:block;}
+  .pl-today-btn{width:100%;margin-top:16px;border:none;border-radius:var(--radius-m);background:var(--accent);color:#fff;font-weight:700;font-size:14px;padding:13px 0;}
+  .pl-game-hint{font-size:12px;color:var(--ink-soft);margin:10px 0 0;text-align:center;}
+  .pl-backdrop{position:absolute;inset:0;background:rgba(20,25,22,.45);z-index:8;}
+  .pl-sheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow-y:auto;background:var(--bg);border-radius:22px 22px 0 0;z-index:9;padding:0 16px 28px;}
+  .pl-sheet.pl-enter{animation:pl-up .22s ease-out;}
+  @keyframes pl-up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+  @media (prefers-reduced-motion:reduce){.pl-sheet.pl-enter{animation:none}}
+  .pl-sheet-head{display:flex;align-items:center;justify-content:space-between;padding:16px 0 6px;position:sticky;top:0;background:var(--bg);z-index:1;}
+  .pl-sheet-head h2{font-family:'Fraunces',serif;font-size:21px;font-weight:600;margin:0;}
+  .pl-close-x{width:44px;height:44px;border-radius:50%;border:none;background:var(--surface-alt);color:var(--ink);display:grid;place-items:center;padding:0;}
+  .pl-close-x svg{width:18px;height:18px;}
+  .pl-g-card{background:var(--surface);border-radius:var(--radius-m);padding:14px 14px 16px;margin-top:12px;}
+  .pl-g-title{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
+  .pl-g-title h3{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin:0;}
+  .pl-g-title .pl-cnt{font-size:12px;font-weight:800;color:var(--ink-soft);}
+  .pl-g-title .pl-cnt.pl-full{color:var(--cor-ink);}
+  .pl-g-card.pl-lonca .pl-g-title .pl-cnt.pl-full{color:var(--lonca-ink);}
+  .pl-cor-grid{display:grid;grid-template-columns:1fr repeat(4,48px);align-items:center;row-gap:6px;}
+  .pl-cor-grid .pl-colh{text-align:center;font-size:12px;font-weight:800;color:var(--ink-faint);padding-bottom:2px;}
+  .pl-cor-grid .pl-acc{font-size:13px;font-weight:700;word-break:break-all;padding-right:6px;}
+  .pl-tick{width:40px;height:40px;border-radius:50%;border:2.5px solid var(--ink-faint);background:var(--surface);display:grid;place-items:center;padding:0;margin:0 auto;color:#fff;}
+  .pl-tick svg{width:18px;height:18px;opacity:0;}
+  .pl-tick.pl-on{border-color:var(--cor-ink);background:var(--cor-ink);}
+  .pl-tick.pl-on svg{opacity:1;}
+  .pl-lonca-row{display:flex;align-items:center;gap:14px;padding:5px 0;}
+  .pl-lonca-row .pl-nm{font-size:14.5px;font-weight:700;word-break:break-all;}
+  .pl-lonca-row .pl-tick.pl-on{border-color:var(--lonca-ink);background:var(--lonca-ink);}
+  .pl-lonca-row .pl-tick{margin:0;flex:0 0 auto;}
+  
+
 </style>
 </head>
 <body>
@@ -385,16 +528,19 @@ const DEFAULT_HOLIDAYS = [
   {id:'h_2027-05-19', date:'2027-05-19', name:'Kurban Bayramı 4. Gün / 19 Mayıs Gençlik ve Spor Bayramı', half:false},
 ];
 
-let state = { courses: [], holidays: JSON.parse(JSON.stringify(DEFAULT_HOLIDAYS)), attendance: {} };
+let state = { courses: [], exams: [], plans: [], game: {}, holidays: JSON.parse(JSON.stringify(DEFAULT_HOLIDAYS)), attendance: {} };
 let ui = {
   tab:'calendar',
-  viewYear:2026, viewMonth:8, // Eylül 2026
+  viewYear:new Date().getFullYear(), viewMonth:new Date().getMonth(), // açılışta bugünün ayı
   selectedDate:null,
   confirmDialog:null,
-  courseForm:{name:'', days:[], limit:''},
+  courseForm:{name:'', days:[], limit:'', room:''},
+  editCourse:null,
+  examForm:{courseId:'', kind:'Vize', date:'', time:''},
   holidayForm:{date:'', name:'', half:false},
 };
 
+const appStartedAt = Date.now();
 let configLoaded = false;
 let attendanceLoaded = false;
 
@@ -405,32 +551,43 @@ let attendanceLoaded = false;
    işlemi sadece kendi belgesine dokunur. Dersler/tatiller (nadiren
    değişen, küçük veri) tek bir belgede (yoklama-config/shared) tutulur. */
 function startSync(){
-  onSnapshot(configDocRef, (snap)=>{
+  onSnapshot(configDocRef, (snap)=>{ try{
     if(snap.exists()){
       const data = snap.data();
       state.courses = (data && data.courses) || [];
+      state.exams = (data && data.exams) || [];
       state.holidays = (data && data.holidays && data.holidays.length) ? data.holidays : DEFAULT_HOLIDAYS;
     }else{
-      setDoc(configDocRef, { courses: [], holidays: DEFAULT_HOLIDAYS }).catch(e=>console.error('İlk ayar kaydı hatası', e));
+      setDoc(configDocRef, { courses: [], exams: [], holidays: DEFAULT_HOLIDAYS }).catch(e=>console.error('İlk ayar kaydı hatası', e));
       state.courses = [];
+      state.exams = [];
       state.holidays = DEFAULT_HOLIDAYS;
     }
     configLoaded = true;
     render();
-  }, (err)=>{ console.error('Ayar senkron hatası', err); syncError = (err && err.message) || String(err); render(); });
+  }catch(e){ console.error(e); syncError = 'Ayarlar okunamadı: ' + (e && e.message); render(); } }, (err)=>{ console.error('Ayar senkron hatası', err); syncError = (err && err.message) || String(err); render(); });
 
-  onSnapshot(attendanceColRef, (snap)=>{
+  onSnapshot(attendanceColRef, (snap)=>{ try{
     const next = {};
+    const nextPlans = [];
+    const nextGame = {};
     snap.forEach(docSnap=>{
       const d = docSnap.data();
+      if(d && d.kind==='plan'){
+        nextPlans.push({ id:d.id, who:d.who, text:d.text||'', start:d.start||'', end:d.end||'', done:!!d.done, pinned:!!d.pinned, created:d.created||0 });
+        return;
+      }
+      if(d && d.kind==='game'){ if(d.date) nextGame[d.date] = d; return; }
       if(!d || !d.date || !d.courseId) return;
       if(!next[d.date]) next[d.date] = {};
       next[d.date][d.courseId] = { ilker: d.ilker||0, ceren: d.ceren||0 };
     });
     state.attendance = next;
+    state.plans = nextPlans;
+    state.game = nextGame;
     attendanceLoaded = true;
     render();
-  }, (err)=>{ console.error('Devamsızlık senkron hatası', err); syncError = (err && err.message) || String(err); render(); });
+  }catch(e){ console.error(e); syncError = 'Kayıtlar okunamadı: ' + (e && e.message); render(); } }, (err)=>{ console.error('Devamsızlık senkron hatası', err); syncError = (err && err.message) || String(err); render(); });
 }
 
 async function writeAttendanceField(ds, courseId, person, value){
@@ -441,11 +598,12 @@ async function writeAttendanceField(ds, courseId, person, value){
 }
 async function writeConfig(){
   try{
-    await setDoc(configDocRef, { courses: state.courses, holidays: state.holidays });
+    await setDoc(configDocRef, { courses: state.courses, exams: state.exams, holidays: state.holidays });
   }catch(e){ console.error('Ayar kaydı hatası', e); }
 }
 async function deleteCourseEverywhere(courseId){
   state.courses = state.courses.filter(c=>c.id!==courseId);
+  state.exams = state.exams.filter(x=>x.courseId!==courseId);
   writeConfig();
   try{
     const q = query(attendanceColRef, where("courseId","==",courseId));
@@ -459,7 +617,8 @@ async function clearAllAttendance(){
   try{
     const snap = await getDocs(attendanceColRef);
     const dels = [];
-    snap.forEach(d=>dels.push(deleteDoc(d.ref)));
+    // sadece yoklama kayıtları (courseId'li); planlar ve oyun kayıtları KORUNUR
+    snap.forEach(d=>{ const x=d.data(); if(x && x.courseId) dels.push(deleteDoc(d.ref)); });
     await Promise.all(dels);
   }catch(e){ console.error('Toplu silme hatası', e); }
 }
@@ -519,10 +678,12 @@ function fmtDateLong(ds){
 /* ================= ICONS ================= */
 const ICONS = {
   calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',
+  plans:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6.5l1.5 1.5 2.5-3M4.5 12.5l1.5 1.5 2.5-3M4.5 18.5l1.5 1.5 2.5-3M12 6.5h8M12 12.5h8M12 18.5h8"/></svg>',
   chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-7"/></svg>',
   gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.3"/><path d="M19.4 13.5a7.6 7.6 0 000-3l1.9-1.4-2-3.4-2.2.7a7.6 7.6 0 00-2.6-1.5L14 2.5h-4l-.5 2.4a7.6 7.6 0 00-2.6 1.5l-2.2-.7-2 3.4L4.6 10.5a7.6 7.6 0 000 3L2.7 14.9l2 3.4 2.2-.7c.77.66 1.65 1.17 2.6 1.5l.5 2.4h4l.5-2.4a7.6 7.6 0 002.6-1.5l2.2.7 2-3.4z"/></svg>',
   chevL:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
   chevR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg>',
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13"/></svg>',
   x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
@@ -531,7 +692,23 @@ const ICONS = {
 /* ================= RENDER ================= */
 let syncError = null;
 
+function showFatal(e){
+  const app = document.getElementById('app'); if(!app) return;
+  const msg = (e && (e.stack || e.message)) ? String(e.stack||e.message).split('\n').slice(0,3).join(' | ') : String(e);
+  app.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;padding:24px;text-align:center;">
+      <div>
+        <div style="font-weight:700;color:#B23A2E;margin-bottom:8px;">Uygulama açılırken bir hata oldu</div>
+        <div style="font-size:12px;color:#5B6660;line-height:1.5;word-break:break-word;">${msg.replace(/</g,'&lt;')}</div>
+        <button onclick="location.reload()" style="margin-top:14px;border:none;background:#1B211D;color:#fff;border-radius:10px;padding:10px 18px;font-weight:700;">Yenile</button>
+      </div>
+    </div>`;
+}
+window.addEventListener('error', (ev)=>{ if(!configLoaded || !attendanceLoaded) showFatal(ev.error || ev.message); });
 function render(){
+  try{ renderInner(); }catch(e){ console.error('Render hatası', e); showFatal(e); }
+}
+function renderInner(){
   const app = document.getElementById('app');
   if(syncError){
     app.innerHTML = `
@@ -544,9 +721,17 @@ function render(){
     return;
   }
   if(!configLoaded || !attendanceLoaded){
-    app.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#93998F;font-size:13px;">Yükleniyor…</div>`;
+    const slow = (Date.now() - appStartedAt) > 8000;
+    app.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:24px;text-align:center;color:#93998F;font-size:13px;line-height:1.6;">
+      <div>Yükleniyor…
+        ${slow ? `<div style="margin-top:10px;color:#5B6660;font-size:12px;">Bağlantı beklenenden uzun sürdü (ayarlar: ${configLoaded?'tamam':'bekleniyor'}, kayıtlar: ${attendanceLoaded?'tamam':'bekleniyor'}).<br>İnternetini kontrol edip sayfayı yenile.</div>
+        <button onclick="location.reload()" style="margin-top:12px;border:none;background:#1B211D;color:#fff;border-radius:10px;padding:10px 18px;font-weight:700;">Yenile</button>` : ''}
+      </div></div>`;
     return;
   }
+  const keepScroll = (lastRenderedTab===ui.tab);
+  const savedScroll = keepScroll ? ['.app-main','.sheet-body','.pl-sheet'].map(sel=>{ const el=app.querySelector(sel); return [sel, el?el.scrollTop:0]; }) : [];
+  lastRenderedTab = ui.tab;
   app.innerHTML = `
     <header class="app-header">
       ${logoSVG()}
@@ -559,10 +744,12 @@ function render(){
       ${ui.tab==='calendar' ? renderCalendarTab() : ''}
       ${ui.tab==='summary' ? renderSummaryTab() : ''}
       ${ui.tab==='settings' ? renderSettingsTab() : ''}
+      ${ui.tab==='plans' ? renderPlansTab() : ''}
     </main>
     <nav class="bottom-nav">
       <button data-action="set-tab" data-tab="calendar" class="${ui.tab==='calendar'?'active':''}">${ICONS.calendar}Takvim</button>
       <button data-action="set-tab" data-tab="summary" class="${ui.tab==='summary'?'active':''}">${ICONS.chart}Özet</button>
+      <button data-action="set-tab" data-tab="plans" class="${ui.tab==='plans'?'active':''}">${ICONS.plans}Planlar</button>
       <button data-action="set-tab" data-tab="settings" class="${ui.tab==='settings'?'active':''}">${ICONS.gear}Ayarlar</button>
     </nav>
     <div class="sheet-backdrop ${ui.selectedDate?'open':''}" data-action="close-sheet"></div>
@@ -570,6 +757,7 @@ function render(){
       <div class="sheet-handle"></div>
       ${ui.selectedDate ? renderDaySheet() : ''}
     </div>
+    ${(ui.tab==='plans' && pl.gameDay && pl.who==='ortak') ? renderPlGameSheet() : ''}
     <div class="modal-backdrop ${ui.confirmDialog?'open':''}" data-action="cancel-confirm"></div>
     <div class="confirm-modal ${ui.confirmDialog?'open':''}">
       ${ui.confirmDialog ? `
@@ -581,8 +769,13 @@ function render(){
       ` : ''}
     </div>
   `;
+  savedScroll.forEach(([sel,top])=>{ const el=app.querySelector(sel); if(el) el.scrollTop=top; });
+  if(pl.scrollTop0){ const mn=app.querySelector('.app-main'); if(mn) mn.scrollTop=0; pl.scrollTop0=false; }
+  pl.sheetEnter = false;
+  if(ui.tab==='plans' && pl.adding){ const inp=document.getElementById('pl-draft'); if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); } }
   attachOnce();
 }
+let lastRenderedTab = null;
 
 const ILKER_PHOTO = 'data:image/jpeg;base64,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';
 const CEREN_PHOTO = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwQDAwQEAwQFBAQFBgoHBgYGBg0JCggKDw0QEA8NDw4RExgUERIXEg4PFRwVFxkZGxsbEBQdHx0aHxgaGxr/2wBDAQQFBQYFBgwHBwwaEQ8RGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhr/wAARCADcANwDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD0sCngcU7ZShfSsLl2G4pQKkVeuadj0qkWiMClI4p23mlxxg07FEdH4U/aKQilYCF19KiIzVlhmoinvTTAi20mKeRim1QEYBprL61JSN0FS9AK5FMIqRqYaYDCPWozUp5zUZqGBCRio2/Wp2FREDmnYizK7D1qNhU5HaoW5pXJZHUJGamPGaiPJqRCBQcfWtvTYtpWsmBcsM10NgmWFUB3vhxB8vNei2x/crXAeH0Py131v/qVpkni+0elAX0qXZShKk0syPbQFOTUu2n7apMtEG2k21Y20wj6U7jItopuKmK5FIIzmlcCuy+lRkVoeT04pGtxjNSOxnGNm6Ck8hvStDaM4xSPhRTuKxmmBvSmGJvSrT3CJnfIiD1Y4quL6F2ISVGA64NJyQWZXaF89KYYm9KluLtISG8xWU+hp8cySY2kHPSi9ws0VTGRUZjbHFae0Ec0zyxQBlshzzTGT2rTePnpULRc9KdyLmYY2ycCoWjYdq2DDntULw47VIjIZDzwahMZB6Gtcx89KYYsnpQBStkO/oa6TT4/mFY6JiQVv6evK5qkI7rQFI213UH+qWuN0IY212EX+rFUSzyLb9aUJUuOacqEmosbIh24NLtqx9ndz8oqxHZZHzcUxlJU3cAU5bct1FaK2wA4p5iFAzPFqB1FL5HP3avmP5eKaY8UDKJiIpjJx0q6y1UupEt42kmcIijLMTwBSAqSlVzmub8Ra/HpUGR+8lPRFOTXCeMfia88z2ehNhQSvmCuWh8Qy2Y82VpLq4f7xYZAqGx2Ogk8T3N3KzXdvMsQPQL2qG88a6bbL+4SZJO4cYrEuPExv4GWYlJD04xXE6m7PKSMsKiMbvUrY6y68eXDyERPtT0HNdf4Q8ardskd4wDjgE8V4kA+eAa6HQYc3StI5ULzwa1aUUT8TPoNdYTegVWbLYJPQD1qaTXrCN9hmBbODivLNR8ZLa2i2yKpKjGQea49fEc5uCytjmpTbJaPo2G8hueYWD/SptoPavN/ButF76CJpFkEy5BU9PY+9emYqibERXAqF0J7VbxxxTClArFLyvamGPB5FXig71GY6BFFY/3g4re09BleKzBFh62tPTcQKaJO00X+Cuvi+4K5PR12la6qM/KKu5LPN47D/noauJaooHy5PrVjZ+FSKoxzUGyK4jHYU7ZVgKM07YPSmUVdtG2rOz14pNmOtAytimsMirDKBUbjigCjOwijd5GCooJJPQCvA/iP8QTq0r6Zorn7MrbZJAfvn/Cug+Mnjo2cf9i6ZLiSQfvmU849K8r0HSi6CabnPPNRKXKioq43TdJJ+dhge9a4sY9pG2tAoFTCjApqjNcbmdkYaGTJpygHaoBPcVmS6Ku4k5JNdO0fFQlSDR7RjdNHLHRwv8P6VVaN7XdtUmuvZSRzVC5tA6nA5qo1O5DpHE3VxhyWXLVRkmYn+7XUXmkBskDmsGewZSa6YSTOaULFzw7r02kX8M4O7Y2cGvprw5rUGv6bFdWzBsj5h6GvkzaytgjpXonwz8WNoeqR287n7JO21wT0PrWzSsZ2Pobaaa0eatoqyIrKcqRkEd6UxcVmIo+WKYY6u+VzzSGI+lAmijs+YYrY09MMOKo+XhxWtZrgjFMzOq0pcla6aP7gxXOaUMbc10UX3BTQmcuUFATH0qxsBpfLpI2RX2+1G2rHlj0pfLAplEAQY5HNLszU232o8vNK4FZos1ieKtXi8P6HeX8xA8tDtzxknpXQshzgV4H+0D4jKR2+j27/ACj55cH9KLgeMvcy69rctzcks8shY/nXbQIIkVFGABiuK8NoXud/p1rspbiO2iMkzbVArmrN3sdVHRXJ36VGOKxJPFEG7aik1HH4likcqUKD1rn5WdPOjeZ8VXd91Qi9SRQQRg0b89KLWNBScVG5zTqYxoFYa0at1rPu7CN1baBmrpY80Bdxou1sS4po4vULFoW3bapwS+W4K8MDkfWu6utOS6jKk89q4i/tXsrsowxzXdSndHBUjY+pPhxrQ13wvayMf3sI8txn0711u0eleFfArWTFqlzpkj5S4TcgPqOte/iIYHFW9zApmM56U0x81f8AKpPKB7fpSEZjphxxWjZjkcVDNENwq9ZpgigR0Wmjpmugj+6KwtOHStxD8ooM2YezFOVcg1IBSheOBTRuhmyneVUqD1p2OaYyDy+KQCp2WmbfapApX062dvJO/CxqWP4V8f8AxUvXvtUFzL965cyKPRO1fVXjOYx6S0KZ3zttH9f0r5C+Itz9o8RSBRiGIeXEPQCnHcpId4VtSIXk29TxmtqXT0lkM14d4H3UzwKfoFoYtLhYjGVzVfULkq5UHFcU3dndTikiGeCydSrRIB7DFZMthb5+Q7asvIufmIB+tZlxcoJCN360lzFNRZchhKYUE4HTmtOL5RisWC6BI5zWtC3mAFals0iiwWODkVBJKFFPcEDrVGZ+CM5pDehI11EgBdgM06K/t8/6wD6msSe1888tj8ajGhvIOJcfjW6ijGUnsddE8cq5Rg30NYnimwWW1E6L86dSPSq9tZ3umEOj70HUVrao4uNJlY/3M04q0jCWqM74bX50/wAXaa4ON0gQ/jX18Ez24r4j8N3Rg1iylBwUnU/rX27Yv59nby/89I1b8xXUziYbPam+Wc1a20nlmpEZlwuGH1q5aqDiobqIll+tWrRCMZoFc3bDjFa6tgCsmyGCK1V6UEFPaKeFGOKAvNPCmnY3sNCDNKEGaeFqTYO1MZFs70m0VPtBqNwB+dSJnmfxO1tdJCOx5ii3oPVjxXytredT1qNj1dh/Ovd/jZJ57zlCdqERg14dp0f2nXoFHKIalytc3jC8UzvFh8q1VBxtUAYrjddt7lizQsV9xXesAU/Csq7tw2cgV56lrc7oxbR5DrtrKkcEsbyM/IfnrVTSYJZDK0rMABxn1r0m80iN+QAPwrNGkYYkDINdXtFymSpO5laZC7gluFFdXaRARrkVDb2KooXGBWjHHtXArkbuzphGxRvDsUmufuZyrHc2K6K/QiM1x2qLJkCPv1q46uxNTQsxy+Y3ynNaUbsqCuJ1C7n09o/IfkjmtLSdduJEJvYsxg43rXR7NpHP7RHa2komO3sRyKTVY1h064UcDbUGmssjhozkGn+Kn8rS3z1bAFEFrYU9jh9HU/2hBgciQH9a+6tDG/R7Anvbp/Kvi7wdY/b9dt4sZGc19raDCY9HtEI+7GBXXI4GW9gppWp9gppUnNQZmfcg4GPWpbZSKdPGOM1JBzigTNKzGMVqr92s216itJfu0kIaqZ6ipNgxTwAaUCqNxqqKXbTgKXFIlsbtFQz4SJ26kDpVgiop1BQ8ZzQNHgvxgsDJol/PnaYsOPc5rwvwxEf7TjcjOMnNfQ3xxzDotwqD70S5H414bpNuLe9h2jhlrGeh3UtUdYzYWqFwcmrjciqs20fWvPaPQgihOBiqcgVfSrV04UVjySmSYBemarpc0ZdiG9wB0q4VC8cVSjlSAjceT6VN9qjOTuqbitYju0DIcjIrEutPWQAqBW1cyBkypzVRHByOtawbWpnJXOautDWf7yhhSwaE4h8tRhPSuoVA3b9Ktwwj0Fae0ZzypGZo2mtbADsKpeOWZLa2T+81djBAoxgVzvjCyN3PbRpwAM81dOXvXMZrSxP8H9MN74jWQLkKAK+urKLyrZE7AcV8+fA2JT4gW2jiG2NCXfHU4r6OVAFAA7V035tTinFxdmQlPSm4qzs9qTyvegxM64HSnQjjpT7mPoM96IUxTJNCAYAq+mdtUrccjNXlOBQImAp+KRaeBQbsNtG004dafigCLaaawJBBqwOvNIVH50BseOfGXT2vLJFUZEuErxGCxktLsRzqVki4INfRPxJtibOJj/DcDFc/4i8MWN1ocuotbgXsKDa4OCR7isJ7HVRnbRnk8hOOKoTv1zVyfK1nynOc1w9T1YFCYNM2AeKjksSEJiPz1eAUdCKqXWq2tnxLIA3oDT1ZozmrjRJ5boXEs0ilTkAE4/KrEssyoxQZfHFX11e2ushHx9aEVH6EHNP1RNmZmk3906Srf7d38OK0rZSTk96nTT0Q7gvJqRYSkgx0oJ2JY1FW4Rg0yJD3qwiYNG5MtUW4MZGRWFqjNc3jrjhBxW3I629s8shICjtXOqZW8+5k+8emewraBzyXU9k+A+hiC2vNSkH7yVtie2K9q2HHSvOfhBbeToCOQQZDkj3r0sdK60eXUk3K5BtIpCKnwKQxknimYsz7lOhNJEuelWLlMAZpkS45oCxYg4PNXVPFU4utWh0FIC92pKXtSVRqKOoqUVEOoqUUAKKDzSUCkLqcN8QYjJpx9FlU/rTJrcXOjXMfYwlefUCrfjxT/ZZKjI3qT+dZGsamlhpkKIwMkvRR1PFZyWhqtDwnUEMTlWGCpINYlw7HgV2XizTJbWUTmMhJeST61yO0Fq4JqzPWoyvExLm2lZHKzPG+OCtcRqdjP5xbzWlOed1emTQg5rm9V04l98Yz61rSfc6Ek9yDRH0n7CwvAEmzjmk1lbfToI5rO5DMTyoNZr2zK2GjOfpTFtQ55jJPuK3aTJ9m073Og0LXVugIpj83bNdHsBINcbaaSWIk5QjpiultGkRArEnHeueVr6EvQ0wAAMVPFHmoIBvxmtvT7F7maOKNdzSMABStcxnIpTAMvlnB781cudGSDw3NcMpElzIqJkdgc5r1LTPhvYzOpnBaVQC3pmszx/YLFLYWFuNqBgwUV0xhY4p1eh3Xw+sxb+G7XjGRkCurIGKz9AtxbaRZxAY2xgGtM1ucUnqQ4ptTUYxQyGUrr7oqKLpVm5XIFQooApCLEY5qzVaLqKs0AXOopcDuaRelLxVGwowO9LuHrTcCkoAfnPel3YpnTrxUFw+FOGqXuLqcz40uVawljJxx2GcmuY0Ky/tBzf337zy1AiXtmtvVm+1ysWGY0GxP9onrU+l2o0ZRDLGzwdI2UZP0NSXfQ4b4qkRaTZRtGsbSMSABzXje4CXnjNem/FbWVv8AWUtojmG2Tj6nrXlV4dpLLXHU3PQoO0UWZF3HI5qvNbBwM1Wt9QVOH5qz9tikHDCslodykmU5LEf3c1D9lAP3RV8XSZ60ZDHgiqTJbKiptOMVahTJp/lbiMYNW7SH5ufxq9zOTsWLKDJHvXo/g3SWsruO6u48P1jVv51B4L0K3LRXV5H5hDZRGHH416Ze28NykciRqjr1xW8Yq1zhqVOhe0u4QSys3BbmuL8QxHU/FNrsXKxYOfauughVbcZ+UleDWHpVqZ9cnd+VVQn5Gtkcvmzu7WLy4I19BU23g0qjCgegpaoxI9tBXBp+KQgk0MTKtwvAqBelWbhTtHFV1GBzSETRDmrFQRcGp80AWt3FLn2r5h0z9oLW7iZEuHjb14HNd3bfHBURWvrGMRjG51b9a05TU9jzTsiuQT4keG2tI7kahG4dQfLU/MKJfiToMUPmGZz6KByakDrXJINZOoEpC3JyeBXFyfGjQ1inLRzLKg/dqQMMa891v9oJriKWytdPSK4Y483Odg9aXKxnsCWytcW8Q4CneeaNc8VafocE8bTI92q5WEHn2Jr5rPxE1nzzLPfEhR+7wcfnT7DV5tSt5rm5YyTzOSzsckj0rOq3CFyoR55WLGrXb6heXFzJy8rlj9axZ4ty8gVfkbaOe9UJC5kPTZXmuTbPVjFJWMee0CE4GM1QKuhO3OK27jrVXYGbGK0THexQV5Aehq5CZGI6gVN9nHoKsxRYHSmK4sJYtjmt/RrJrm7ghAyZXC/nWfbwgY4Fej/C7Rft+sNcSruitlz/AMC7VUVdmc3ZHodzpQisbaW2QK1ugVsDqB1/GrssZe3WVMFSB0rVWHfHNG33WqrZQmONoWHyHOB6V12toedJ3K4bNoD/AAk4H1qbRrRVjmkYYkMuTSW9uWmaKT/Vg7hWxZxBEkAGBuzVohlpPmAqTaKYgxT80yGGB6Uyn5plAmRXH3RVSrdx90VVHSkIljqSmIOalxQB+f0umXtrcTvDbymGI/eCnpU91rcj6bsZmGSFPqK9bju5DbhGwEI+7gV4t46QaffTrGMKx3ACqp1ue6O2rR9nFO9zqIdWjk0tls8faLZAWHdhTbDxVPfQmJ22EjAridMluS1vcWYLMRhx2xWrfxGJ0vNPHy5/eoP4TWzWpyXZXvNQlFzIGkYkN3NV0vGEm8ncxqtqkyyz+anG4c1Q+0Ed6ARt3OrOVwDXbeCr8XemlCxLo2DXk0lznJJrpPA+uCy1HyJW/dzcAe9YYiPNTN6MlGep6rI2WIzVWUYNSg55prpuzXkXR6pSmG41FtAOasyxHNMCEdadwEjJY8irkSioETnNWkXFUncktxIOM17z8L9NWx8OidhiW6fLZ9B0rwe3ZSfmJ2jk49K+mvCdxYXugWMulyLNCsSqWXswHIIrqorU5qz0NLy8gj1NNaD5wy9atYz0pQmOtdFrnBqUza/vWkHcVYhTK5PU1NtApwGMGmK4Kpzg0/aKQHJpSaYg2imGnUmKBEFyPlFVV6VbuR8oqqBikIev3qmFRKOQakzQB8xX6xQORE25V714f8Q7pLm/l8r+EBfxr1fVriRLaZlPIUkflXhOrTPOJZJW3OW5NcuE1lc9bEv3UijZ6ncWgKJKyRnqAetbGm689rMGLbo24dT0IrmXHBqKF2HGa9Nnm2PR9Z0hLmwTUNNIeEjLKD0rkJCR7V0HgW6laeS0dt0DqcqayNbQQ38yRjCgnAotoPYynfjk0kFw0MySqcMjZFQsSTg0xqXLdD2Z7r4c1ZNV06KZThujD3rZzXk/w8vJlvpIA/7phkg16mpzXh1o8k7HqU5c0bjm5pAM9qKVetQtjQVVA7Yp4NJRTJLVm+yVW9DkVKfHupfD/XYrzSWxp95xPbN9wH+8B61Wg6isDxycQ2hwCQ/euqjL3rGFVaH054K+KmkeKxHC0y216R9xjgN9DXoPavgiwupbS8R7ZzEwIIK8YNfXXwv1++1vQYX1KXznT5QxHOK9BxseczvM0tLgZoNZkCCnU2nCmhBRRRTAhuPu1VxxmrVx92q4+6aAHDtTqavanVIH/9k=';
@@ -592,6 +785,15 @@ function logoSVG(){
     <img class="p-ceren" src="${CEREN_PHOTO}" alt="Ceren">
   </div>`;
 }
+
+function examsOn(ds){ return state.exams.filter(x=>x.date===ds).sort((a,b)=>(a.time||'').localeCompare(b.time||'')); }
+function courseName(id){ const c=state.courses.find(c=>c.id===id); return c?c.name:'(silinmiş ders)'; }
+function todayStr(){ const t=new Date(); return dstr(t.getFullYear(),t.getMonth(),t.getDate()); }
+function nextExam(courseId){
+  const td=todayStr();
+  return state.exams.filter(x=>x.courseId===courseId && x.date>=td).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')))[0];
+}
+function fmtExam(x){ return shortDate(x.date)+(x.time?' · '+x.time:''); }
 
 /* ---- Calendar tab ---- */
 function renderCalendarTab(){
@@ -621,8 +823,9 @@ function renderCalendarTab(){
     if(hol) cls += hol.half ? ' holiday-half' : ' holiday-full';
     else if(!hasCourses) cls += ' no-class';
 
+    const hasExam = examsOn(ds).length>0;
     cells += `<button class="${cls}" data-action="open-day" data-date="${ds}" title="${hol?hol.name:''}">
-      <span>${dayNum}</span>
+      ${hasExam?'<span class="exam-badge">S</span>':''}<span>${dayNum}</span>
       <span class="cal-dots">${dots.ilker!=='none'?`<span class="mini-dot mini-ilker status-${dots.ilker}"><img src="${ILKER_PHOTO}" alt=""></span>`:''}${dots.ceren!=='none'?`<span class="mini-dot mini-ceren status-${dots.ceren}"><img src="${CEREN_PHOTO}" alt=""></span>`:''}</span>
     </button>`;
   }
@@ -644,6 +847,7 @@ function renderCalendarTab(){
     </div>
     <div class="legend">
       <span><i style="background:var(--holiday-soft)"></i>Resmi tatil</span>
+      <span><i style="background:var(--danger)"></i>Sınav (S)</span>
       <span><img class="legend-ph" src="${ILKER_PHOTO}" style="box-shadow:0 0 0 1px var(--ilker)">İlker devamsız</span>
       <span><img class="legend-ph" src="${CEREN_PHOTO}" style="box-shadow:0 0 0 1px var(--ceren)">Ceren devamsız</span>
     </div>
@@ -664,6 +868,9 @@ function renderDaySheet(){
   const courses = coursesForWeekday(dow);
 
   let body = '';
+  for(const x of examsOn(ds)){
+    body += `<div class="exam-line">SINAV · ${x.kind||'Sınav'} · ${courseName(x.courseId)}${x.time?' · saat '+x.time:''}</div>`;
+  }
   if(hol){
     body += `<div class="holiday-banner">${hol.half?'Yarım gün resmi tatil':'Tam gün resmi tatil'}: ${hol.name}</div>`;
   }
@@ -676,7 +883,7 @@ function renderDaySheet(){
       const e = getEntry(ds, c.id);
       body += `
         <div class="day-course-block">
-          <h4>${c.name}</h4>
+          <h4>${c.name}${c.room?` <span style="font-weight:500;color:var(--ink-soft);font-size:11.5px;">· ${c.room}</span>`:''}</h4>
           <div class="person-att-row">
             <span class="p-label ilker">İLKER</span>
             ${segControl(ds, c.id, 'ilker', e.ilker)}
@@ -726,6 +933,8 @@ function renderSummaryTab(){
           ${c.limit>0 ? `<span class="course-limit-tag">Limit: ${fmtNum(c.limit)}</span>` : `<span class="course-limit-tag">Limit yok</span>`}
         </div>
         <div class="day-chips">${c.days.map(dw=>`<span class="day-chip">${TR_DOW[dw-1]}</span>`).join('')}</div>
+        ${c.room?`<div class="room-tag">${c.room}</div>`:''}
+        ${(()=>{const x=nextExam(c.id);return x?`<div class="exam-next">Sıradaki sınav: ${x.kind||'Sınav'} · ${fmtExam(x)}</div>`:'';})()}
         ${gaugeRow('İlker','name-ilker','status-','ilker',totals.ilker,c.limit)}
         ${gaugeRow('Ceren','name-ceren','status-','ceren',totals.ceren,c.limit)}
       </div>`;
@@ -766,14 +975,35 @@ function renderSettingsTab(){
     <div class="section-title">Dersler</div>
     <div class="settings-card">
       ${state.courses.length===0 ? `<p style="font-size:12.5px;color:var(--ink-soft);margin:2px 0 4px;">Henüz ders eklenmedi.</p>` :
-        state.courses.map(c=>`
+        state.courses.map(c=>{
+          if(ui.editCourse && ui.editCourse.id===c.id){
+            const e=ui.editCourse;
+            return `<div class="edit-form">
+              <span class="field-label">Ders adı</span>
+              <input type="text" data-field="edit-name" value="${escAttr(e.name)}">
+              <span class="field-label">Haftanın hangi günleri?</span>
+              <div class="day-toggle-row">
+                ${TR_DOW.map((d,idx)=>`<button class="day-toggle ${e.days.includes(idx+1)?'active':''}" data-action="toggle-edit-day" data-day="${idx+1}">${d}</button>`).join('')}
+              </div>
+              <span class="field-label">Devamsızlık limiti (0 = limit yok)</span>
+              <input type="number" min="0" step="0.5" data-field="edit-limit" value="${escAttr(e.limit)}">
+              <span class="field-label">Sınıf / yer (opsiyonel)</span>
+              <input type="text" data-field="edit-room" value="${escAttr(e.room)}" placeholder="örn. C221">
+              <div class="row-btns">
+                <button class="btn" data-action="cancel-edit-course">Vazgeç</button>
+                <button class="btn btn-primary" data-action="save-course">Kaydet</button>
+              </div>
+            </div>`;
+          }
+          return `
           <div class="item-row">
             <div class="info">
               <div class="name">${c.name}</div>
-              <div class="meta">${c.days.map(dw=>TR_DOW[dw-1]).join(', ')} · ${c.limit>0?'Limit '+fmtNum(c.limit):'Limit yok'}</div>
+              <div class="meta">${c.days.map(dw=>TR_DOW[dw-1]).join(', ')} · ${c.limit>0?'Limit '+fmtNum(c.limit):'Limit yok'}${c.room?' · '+c.room:''}</div>
             </div>
+            <button class="icon-btn edit" data-action="edit-course" data-id="${c.id}" aria-label="Düzenle">${ICONS.edit}</button>
             <button class="icon-btn" data-action="delete-course" data-id="${c.id}">${ICONS.trash}</button>
-          </div>`).join('')
+          </div>`;}).join('')
       }
       <div class="form-block">
         <span class="field-label">Ders adı</span>
@@ -784,8 +1014,40 @@ function renderSettingsTab(){
         </div>
         <span class="field-label">Devamsızlık limiti (opsiyonel)</span>
         <input type="number" min="0" step="0.5" data-field="course-limit" value="${escAttr(ui.courseForm.limit)}" placeholder="örn. 6">
+        <span class="field-label">Sınıf / yer (opsiyonel)</span>
+        <input type="text" data-field="course-room" value="${escAttr(ui.courseForm.room)}" placeholder="örn. C221">
         <button class="btn btn-primary btn-block" style="margin-top:12px;" data-action="add-course" ${(!ui.courseForm.name.trim()||ui.courseForm.days.length===0)?'disabled':''}>${ICONS.plus} Ders ekle</button>
       </div>
+    </div>
+
+    <div class="section-title">Sınavlar</div>
+    <div class="settings-card">
+      ${state.exams.length===0 ? `<p style="font-size:12.5px;color:var(--ink-soft);margin:2px 0 4px;">Henüz sınav eklenmedi.</p>` :
+        state.exams.slice().sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))).map(x=>`
+          <div class="item-row">
+            <div class="info">
+              <div class="name">${courseName(x.courseId)} — ${x.kind||'Sınav'}</div>
+              <div class="meta">${fmtExam(x)}${x.date<todayStr()?' · geçti':''}</div>
+            </div>
+            <button class="icon-btn" data-action="delete-exam" data-id="${x.id}">${ICONS.trash}</button>
+          </div>`).join('')}
+      ${state.courses.length===0 ? `<p class="note">Sınav eklemek için önce ders ekle.</p>` : `
+      <div class="form-block">
+        <span class="field-label">Ders</span>
+        <select data-field="exam-course">
+          <option value="">Ders seç…</option>
+          ${state.courses.map(c=>`<option value="${c.id}" ${ui.examForm.courseId===c.id?'selected':''}>${c.name}</option>`).join('')}
+        </select>
+        <span class="field-label">Sınav türü</span>
+        <select data-field="exam-kind">
+          ${['Vize','Final','Bütünleme','Kısa sınav','Lab sınavı'].map(k=>`<option ${ui.examForm.kind===k?'selected':''}>${k}</option>`).join('')}
+        </select>
+        <span class="field-label">Tarih</span>
+        <input type="date" data-field="exam-date" value="${escAttr(ui.examForm.date)}">
+        <span class="field-label">Saat (opsiyonel)</span>
+        <input type="time" data-field="exam-time" value="${escAttr(ui.examForm.time)}">
+        <button class="btn btn-primary btn-block" style="margin-top:12px;" data-action="add-exam" ${(!ui.examForm.courseId||!ui.examForm.date)?'disabled':''}>${ICONS.plus} Sınav ekle</button>
+      </div>`}
     </div>
 
     <div class="section-title">Resmi Tatiller</div>
@@ -824,6 +1086,264 @@ function shortDate(ds){
   return d+' '+TR_MONTHS[m-1].slice(0,3);
 }
 
+/* ================= PLANLAR =================
+   Kişisel planlar (Ceren / İlker) + Ortak sekmesinde oyun takibi (COR & Lonca).
+   Veri, yeni kural gerektirmesin diye mevcut "yoklama-attendance" koleksiyonunda
+   ayrı belgeler olarak durur:  plan__<id>  ve  game__<tarih>  (kind alanıyla ayrılır).
+   Her tik/işaret kendi alanına merge yazılır → iki telefon birbirini ezmez. */
+const PL_WHO = {ceren:'Ceren', ilker:'İlker', ortak:'Ortak'};
+const PL_SUB = {ceren:'Ceren’in planları', ilker:'İlker’in planları', ortak:'Oyun takibi: COR ve Lonca'};
+const PL_COR = ['ilkerceren266','ilkersav','pembeatac','ikoroski1'];
+const PL_LONCA = ['ilkerjanpolat','cerendgn20','cerenilker1290'];
+const PL_ICON = {
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  chevL:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  chevR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  tick:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6zM12 14v7"/></svg>'
+};
+function plGetWho(){ try{ const w=localStorage.getItem('yoklama-pl-who'); if(PL_WHO[w]) return w; }catch(e){} return 'ilker'; }
+const pl = {
+  who: plGetWho(),
+  y: new Date().getFullYear(), m: new Date().getMonth(),
+  adding:false, draft:'', pick:null, filterDay:null, confirmDel:null,
+  gameDay:null, sheetEnter:false
+};
+function plEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function plToday(){ const t=new Date(); return dstr(t.getFullYear(), t.getMonth(), t.getDate()); }
+function plLong(ds){ const [y,m,d]=ds.split('-').map(Number); const names=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar']; return d+' '+TR_MONTHS[m-1]+' '+names[turkishDow(new Date(y,m-1,d))-1]; }
+
+/* ---- Firestore yazıcıları ---- */
+async function plWrite(id, fields){
+  try{ await setDoc(doc(db,'yoklama-attendance','plan__'+id), Object.assign({kind:'plan', id}, fields), {merge:true}); }
+  catch(e){ console.error('Plan kaydı hatası', e); }
+}
+async function plRemove(id){
+  try{ await deleteDoc(doc(db,'yoklama-attendance','plan__'+id)); }
+  catch(e){ console.error('Plan silme hatası', e); }
+}
+async function gameWrite(ds, field, val){
+  try{ await setDoc(doc(db,'yoklama-attendance','game__'+ds), {kind:'game', date:ds, [field]:val}, {merge:true}); }
+  catch(e){ console.error('Oyun kaydı hatası', e); }
+}
+
+/* ---- mantık ---- */
+const plMine = ()=>state.plans.filter(p=>p.who===pl.who);
+const plEnd = p=>p.end||p.start;
+const plLate = p=>!p.done && plEnd(p) && plEnd(p) < plToday();
+const plCovers = (p,ds)=>p.start && ds>=p.start && ds<=plEnd(p);
+function plWhen(p){ if(!p.start) return null; return (p.end && p.end!==p.start) ? shortDate(p.start)+' – '+shortDate(p.end) : shortDate(p.start); }
+function plSorted(list){
+  return list.slice().sort((a,b)=>{
+    if(a.done!==b.done) return a.done?1:-1;
+    if(!a.done && !!a.pinned!==!!b.pinned) return a.pinned?-1:1;
+    const ea=plEnd(a)||'9999', eb=plEnd(b)||'9999';
+    return ea.localeCompare(eb) || (a.created-b.created);
+  });
+}
+function gstat(ds){
+  const g = state.game[ds] || {};
+  let c=0, l=0;
+  for(let a=0;a<PL_COR.length;a++) for(let n=0;n<4;n++) if(g['c_'+a+'_'+n]) c++;
+  for(let i=0;i<PL_LONCA.length;i++) if(g['l_'+i]) l++;
+  const cT=PL_COR.length*4, lT=PL_LONCA.length;
+  return {c, l, cT, lT, corDone:c===cT, loncaDone:l===lT};
+}
+
+/* ---- görünüm ---- */
+function renderPlCalendar(){
+  const y=pl.y, m=pl.m;
+  const dim = new Date(y,m+1,0).getDate();
+  const lead = turkishDow(new Date(y,m,1)) - 1;
+  const total = Math.ceil((lead+dim)/7)*7;
+  const isGame = pl.who==='ortak';
+  const plans = isGame ? [] : plMine();
+  const td = plToday();
+  let cells = '';
+  for(let i=0;i<total;i++){
+    const n = i-lead+1;
+    if(n<1 || n>dim){ cells += '<div class="pl-day pl-blank"></div>'; continue; }
+    const ds = dstr(y,m,n);
+    const here = plans.filter(p=>plCovers(p,ds) && !(pl.pick && pl.pick.id===p.id));
+    const open = here.filter(p=>!p.done);
+    const past = ds<td && !isGame;
+    let cls = 'pl-day';
+    if(past) cls += ' pl-past';
+    if(ds===td) cls += ' pl-today';
+    if(open.length){ cls += ' pl-has'; if(open.some(plLate)) cls += ' pl-late'; }
+    if(pl.filterDay===ds && !isGame) cls += ' pl-filter';
+    if(isGame){ const st=gstat(ds); if(st.corDone&&st.loncaDone) cls+=' pl-g-both'; else if(st.corDone) cls+=' pl-g-cor'; else if(st.loncaDone) cls+=' pl-g-lonca'; }
+    if(pl.pick && pl.pick.start){
+      const a=pl.pick.start, b=pl.pick.end||pl.pick.start;
+      if(ds===a) cls+=' pl-pick-start'; else if(ds===b) cls+=' pl-pick-end'; else if(ds>a && ds<b) cls+=' pl-pick-mid';
+    }
+    const dots = open.slice(0,3).map(p=>`<i class="${plLate(p)?'pl-late':''}"></i>`).join('');
+    cells += `<button class="${cls}" data-action="pl-day" data-date="${ds}" ${(past&&pl.pick)?'disabled':''}>${n}<span class="pl-dots">${dots}</span></button>`;
+  }
+  return `
+    <div class="pl-cal-nav">
+      <button class="pl-chev" data-action="pl-prev" aria-label="Önceki ay">${PL_ICON.chevL}</button>
+      <button class="pl-month" data-action="pl-today">${TR_MONTHS[m]} ${y}<small>bugüne git</small></button>
+      <button class="pl-chev" data-action="pl-next" aria-label="Sonraki ay">${PL_ICON.chevR}</button>
+    </div>
+    <div class="pl-weekdays">${TR_DOW.map(d=>`<div>${d}</div>`).join('')}</div>
+    <div class="pl-days ${pl.pick?'pl-picking':''}">${cells}</div>`;
+}
+function renderPlAdd(){
+  if(pl.pick){
+    const p = state.plans.find(p=>p.id===pl.pick.id);
+    const a=pl.pick.start, b=pl.pick.end;
+    let msg;
+    if(!a) msg='Takvimden başlangıç gününü seç.';
+    else if(!b) msg=`${shortDate(a)} başlangıç. Bitiş gününü seç ya da tek gün için “Tamam”a bas.`;
+    else msg=`${shortDate(a)} – ${shortDate(b)}`;
+    return `<div class="pl-pick-banner">
+      <b>“${plEsc(p?p.text:'')}” için süre seç</b><span>${msg}</span>
+      <div class="pl-row">
+        <button class="pl-skip" data-action="pl-pick-skip">${p&&p.start?'Vazgeç':'Tarihsiz bırak'}</button>
+        <button class="pl-ok" data-action="pl-pick-ok" ${a?'':'disabled'}>Tamam</button>
+      </div></div>`;
+  }
+  if(pl.adding){
+    return `<div class="pl-add-form">
+      <input id="pl-draft" data-field="pl-draft" type="text" placeholder="Yapılacak ne?" value="${plEsc(pl.draft)}" maxlength="120" autocomplete="off">
+      <button class="pl-go" data-action="pl-add-go" ${pl.draft.trim()?'':'disabled'}>Ekle</button>
+      <button class="pl-cancel" data-action="pl-add-cancel">Vazgeç</button>
+    </div>`;
+  }
+  return `<div class="pl-add-bar">
+    <button class="pl-plus" data-action="pl-add-open" aria-label="Yeni plan ekle">${PL_ICON.plus}</button>
+    <span class="pl-hint">Yeni plan ekle</span></div>`;
+}
+function renderPlList(){
+  let list = plMine();
+  const filtering = !!pl.filterDay;
+  if(filtering) list = list.filter(p=>plCovers(p,pl.filterDay));
+  list = plSorted(list);
+  const head = `<div class="pl-list-head"><h2>${filtering?shortDate(pl.filterDay)+' günündeki planlar':'Yapılacaklar'}</h2>
+    ${filtering?`<button class="pl-chip" data-action="pl-clear-filter">Tümünü göster</button>`:''}</div>`;
+  if(!list.length) return head+`<div class="pl-empty">${filtering?'Bu güne planlanmış bir şey yok.':'Henüz plan yok. Artıya basıp ilkini ekle.'}</div>`;
+  return head + list.map(p=>{
+    const w = plWhen(p);
+    if(pl.confirmDel===p.id){
+      return `<div class="pl-item pl-confirming"><span class="pl-q">“${plEsc(p.text)}” silinsin mi?</span>
+        <button class="pl-no" data-action="pl-del-no">Vazgeç</button>
+        <button class="pl-yes" data-action="pl-del-yes" data-id="${p.id}">Sil</button></div>`;
+    }
+    return `<div class="pl-item ${p.done?'pl-done':''} ${plLate(p)?'pl-late':''} ${p.pinned?'pl-pinned':''}">
+      <button class="pl-check" data-action="pl-toggle" data-id="${p.id}" aria-label="Tamamlandı">${PL_ICON.tick}</button>
+      <div class="pl-body">
+        <div class="pl-txt">${plEsc(p.text)}</div>
+        <button class="pl-when ${w?'':'pl-none'}" data-action="pl-repick" data-id="${p.id}">${w ? w+(plLate(p)?' · süresi geçti':'') : 'Tarih seç'}</button>
+      </div>
+      <div class="pl-acts">
+        <button class="pl-pin ${p.pinned?'pl-on':''}" data-action="pl-pin" data-id="${p.id}" aria-label="${p.pinned?'Sabitlemeyi kaldır':'Üste sabitle'}">${PL_ICON.pin}</button>
+        <button class="pl-del" data-action="pl-del" data-id="${p.id}" aria-label="Sil">${PL_ICON.trash}</button>
+      </div>
+    </div>`;}).join('');
+}
+function renderPlGameBelow(){
+  return `<button class="pl-today-btn" data-action="pl-game-day" data-date="${plToday()}">Bugünün görevlerini aç</button>
+    <p class="pl-game-hint">Takvimde bir güne basınca COR ve Lonca görevleri açılır.</p>
+    <div class="pl-game-legend">
+      <span><i style="background:var(--cor)"></i>COR tamam (sol alt yarı)</span>
+      <span><i style="background:var(--lonca)"></i>Lonca tamam (sağ üst yarı)</span>
+    </div>`;
+}
+function renderPlansTab(){
+  return `<div class="pl" data-who="${pl.who}">
+    <div class="pl-top">
+      <div class="pl-who-tabs">${Object.keys(PL_WHO).map(k=>`<button class="${pl.who===k?'pl-active':''}" data-action="pl-who" data-who="${k}">${PL_WHO[k]}</button>`).join('')}</div>
+      <h1 class="pl-page-title">${PL_WHO[pl.who]}</h1>
+      <p class="pl-page-sub">${PL_SUB[pl.who]}</p>
+    </div>
+    ${renderPlCalendar()}
+    ${pl.who==='ortak' ? renderPlGameBelow() : renderPlAdd()+renderPlList()}
+  </div>`;
+}
+function renderPlGameSheet(){
+  const ds=pl.gameDay, g=state.game[ds]||{}, st=gstat(ds);
+  const corRows = PL_COR.map((a,ai)=>`<div class="pl-acc">${a}</div>`+[0,1,2,3].map(n=>
+    `<button class="pl-tick ${g['c_'+ai+'_'+n]?'pl-on':''}" data-action="pl-g-cor" data-a="${ai}" data-n="${n}" aria-label="${a} ${n+1}. COR">${PL_ICON.tick}</button>`).join('')).join('');
+  const loncaRows = PL_LONCA.map((a,i)=>`<div class="pl-lonca-row">
+      <button class="pl-tick ${g['l_'+i]?'pl-on':''}" data-action="pl-g-lonca" data-n="${i}" aria-label="${a}">${PL_ICON.tick}</button>
+      <span class="pl-nm">${a}</span></div>`).join('');
+  return `<div class="pl pl-backdrop" data-who="ortak" data-action="pl-game-close"></div>
+    <div class="pl pl-sheet ${pl.sheetEnter?'pl-enter':''}" data-who="ortak" role="dialog" aria-label="${plLong(ds)}">
+      <div class="pl-sheet-head"><h2>${plLong(ds)}</h2>
+        <button class="pl-close-x" data-action="pl-game-close" aria-label="Kapat">${PL_ICON.x}</button></div>
+      <div class="pl-g-card pl-cor">
+        <div class="pl-g-title"><h3>COR</h3><span class="pl-cnt ${st.corDone?'pl-full':''}">${st.c}/${st.cT}</span></div>
+        <div class="pl-cor-grid"><div></div>${[1,2,3,4].map(n=>`<div class="pl-colh">${n}</div>`).join('')}${corRows}</div>
+      </div>
+      <div class="pl-g-card pl-lonca">
+        <div class="pl-g-title"><h3>Lonca</h3><span class="pl-cnt ${st.loncaDone?'pl-full':''}">${st.l}/${st.lT}</span></div>
+        ${loncaRows}
+      </div>
+    </div>`;
+}
+
+/* ---- olaylar (ana tıklama dinleyicisinden çağrılır) ---- */
+function plClick(a, t){
+  if(a==='pl-who'){ pl.who=t.dataset.who; pl.pick=null; pl.adding=false; pl.filterDay=null; pl.gameDay=null; pl.confirmDel=null;
+    try{ localStorage.setItem('yoklama-pl-who', pl.who); }catch(e){} }
+  else if(a==='pl-prev'||a==='pl-next'){
+    let m=pl.m+(a==='pl-next'?1:-1), y=pl.y; if(m<0){m=11;y--;} if(m>11){m=0;y++;} pl.m=m; pl.y=y; }
+  else if(a==='pl-today'){ const n=new Date(); pl.y=n.getFullYear(); pl.m=n.getMonth(); }
+  else if(a==='pl-add-open'){ pl.adding=true; pl.draft=''; }
+  else if(a==='pl-add-cancel'){ pl.adding=false; pl.draft=''; }
+  else if(a==='pl-add-go'){
+    const txt=pl.draft.trim(); if(!txt) return;
+    const p={id:'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), who:pl.who, text:txt, start:'', end:'', done:false, pinned:false, created:Date.now()};
+    state.plans.push(p);
+    plWrite(p.id, {who:p.who, text:p.text, start:'', end:'', done:false, pinned:false, created:p.created});
+    pl.adding=false; pl.draft='';
+    pl.pick={id:p.id, start:null, end:null};
+  }
+  else if(a==='pl-day'){
+    const ds=t.dataset.date;
+    if(pl.who==='ortak'){ pl.sheetEnter=!pl.gameDay; pl.gameDay=ds; }
+    else if(pl.pick){
+      if(ds<plToday()) return;
+      const pk=pl.pick;
+      if(!pk.start || pk.end){ pk.start=ds; pk.end=null; }
+      else if(ds<pk.start){ pk.end=pk.start; pk.start=ds; }
+      else if(ds===pk.start){ pk.end=null; }
+      else pk.end=ds;
+    }else{ pl.filterDay = pl.filterDay===ds ? null : ds; }
+  }
+  else if(a==='pl-pick-ok'){
+    const pk=pl.pick, p=state.plans.find(p=>p.id===pk.id);
+    if(p && pk.start){ p.start=pk.start; p.end=pk.end||pk.start; plWrite(p.id,{start:p.start,end:p.end}); }
+    pl.pick=null;
+  }
+  else if(a==='pl-pick-skip'){ pl.pick=null; }
+  else if(a==='pl-repick'){
+    const p=state.plans.find(p=>p.id===t.dataset.id); if(!p) return;
+    pl.pick={id:p.id, start:null, end:null}; pl.adding=false; pl.filterDay=null;
+    if(p.start){ pl.y=+p.start.slice(0,4); pl.m=+p.start.slice(5,7)-1; }
+    pl.scrollTop0=true;
+  }
+  else if(a==='pl-toggle'){ const p=state.plans.find(p=>p.id===t.dataset.id); if(p){ p.done=!p.done; plWrite(p.id,{done:p.done}); } }
+  else if(a==='pl-pin'){ const p=state.plans.find(p=>p.id===t.dataset.id); if(p){ p.pinned=!p.pinned; plWrite(p.id,{pinned:p.pinned}); } }
+  else if(a==='pl-del'){ pl.confirmDel=t.dataset.id; }
+  else if(a==='pl-del-no'){ pl.confirmDel=null; }
+  else if(a==='pl-del-yes'){ const id=t.dataset.id; state.plans=state.plans.filter(p=>p.id!==id); pl.confirmDel=null; plRemove(id); }
+  else if(a==='pl-clear-filter'){ pl.filterDay=null; }
+  else if(a==='pl-game-day'){ pl.sheetEnter=true; pl.gameDay=t.dataset.date; const [y,m]=t.dataset.date.split('-').map(Number); pl.y=y; pl.m=m-1; }
+  else if(a==='pl-game-close'){ pl.gameDay=null; }
+  else if(a==='pl-g-cor' || a==='pl-g-lonca'){
+    const ds=pl.gameDay; if(!ds) return;
+    const f = a==='pl-g-cor' ? 'c_'+t.dataset.a+'_'+t.dataset.n : 'l_'+t.dataset.n;
+    const g = state.game[ds] || (state.game[ds]={kind:'game', date:ds});
+    g[f] = g[f] ? 0 : 1;
+    gameWrite(ds, f, g[f]);
+  }
+  render();
+}
+
 /* ================= EVENTS ================= */
 let listenersBound = false;
 function attachOnce(){
@@ -836,7 +1356,8 @@ function attachOnce(){
     if(!t) return;
     const action = t.dataset.action;
 
-    if(action==='set-tab'){ ui.tab = t.dataset.tab; render(); }
+    if(action.indexOf('pl-')===0){ plClick(action, t); return; }
+    if(action==='set-tab'){ ui.tab = t.dataset.tab; pl.gameDay = null; render(); }
     else if(action==='prev-month'){ shiftMonth(-1); }
     else if(action==='next-month'){ shiftMonth(1); }
     else if(action==='goto-today'){
@@ -872,9 +1393,45 @@ function attachOnce(){
         id:'c_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
         name:ui.courseForm.name.trim(),
         days:ui.courseForm.days.slice().sort(),
-        limit: ui.courseForm.limit ? parseFloat(ui.courseForm.limit) : 0
+        limit: ui.courseForm.limit ? parseFloat(ui.courseForm.limit) : 0,
+        room: (ui.courseForm.room||'').trim()
       });
-      ui.courseForm = {name:'', days:[], limit:''};
+      ui.courseForm = {name:'', days:[], limit:'', room:''};
+      writeConfig(); render();
+    }
+    else if(action==='edit-course'){
+      const c = state.courses.find(c=>c.id===t.dataset.id);
+      if(c){ ui.editCourse = {id:c.id, name:c.name, days:c.days.slice(), limit:c.limit>0?String(c.limit):'', room:c.room||''}; render(); }
+    }
+    else if(action==='cancel-edit-course'){ ui.editCourse = null; render(); }
+    else if(action==='toggle-edit-day'){
+      const day = parseInt(t.dataset.day,10), arr = ui.editCourse.days;
+      const idx = arr.indexOf(day);
+      if(idx>-1) arr.splice(idx,1); else arr.push(day);
+      render();
+    }
+    else if(action==='save-course'){
+      const e = ui.editCourse; if(!e) return;
+      if(!e.name.trim() || e.days.length===0) return;
+      const c = state.courses.find(c=>c.id===e.id);
+      if(c){
+        c.name = e.name.trim();
+        c.days = e.days.slice().sort();
+        c.limit = e.limit ? (parseFloat(e.limit)||0) : 0;
+        c.room = (e.room||'').trim();
+      }
+      ui.editCourse = null;
+      writeConfig(); render();
+    }
+    else if(action==='add-exam'){
+      const f = ui.examForm;
+      if(!f.courseId || !f.date) return;
+      state.exams.push({id:'x_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), courseId:f.courseId, kind:f.kind, date:f.date, time:f.time||''});
+      ui.examForm = {courseId:'', kind:'Vize', date:'', time:''};
+      writeConfig(); render();
+    }
+    else if(action==='delete-exam'){
+      state.exams = state.exams.filter(x=>x.id!==t.dataset.id);
       writeConfig(); render();
     }
     else if(action==='delete-course'){
@@ -936,10 +1493,22 @@ function attachOnce(){
     }
   });
 
+  app.addEventListener('keydown', (e)=>{
+    if(e.target.id==='pl-draft' && e.key==='Enter'){ const b=app.querySelector('[data-action="pl-add-go"]'); if(b && !b.disabled) b.click(); }
+  });
   app.addEventListener('input', (e)=>{
     const f = e.target.dataset.field;
     if(!f) return;
+    if(f==='pl-draft'){ pl.draft = e.target.value; const b=app.querySelector('[data-action="pl-add-go"]'); if(b) b.disabled = !pl.draft.trim(); return; }
     if(f==='course-name'){ ui.courseForm.name = e.target.value; }
+    else if(f==='course-room'){ ui.courseForm.room = e.target.value; return; }
+    else if(f==='edit-name'){ ui.editCourse.name = e.target.value; return; }
+    else if(f==='edit-limit'){ ui.editCourse.limit = e.target.value; return; }
+    else if(f==='edit-room'){ ui.editCourse.room = e.target.value; return; }
+    else if(f==='exam-course'){ ui.examForm.courseId = e.target.value; }
+    else if(f==='exam-kind'){ ui.examForm.kind = e.target.value; }
+    else if(f==='exam-date'){ ui.examForm.date = e.target.value; }
+    else if(f==='exam-time'){ ui.examForm.time = e.target.value; }
     else if(f==='course-limit'){ ui.courseForm.limit = e.target.value; renderSoft(); return; }
     else if(f==='hol-date'){ ui.holidayForm.date = e.target.value; }
     else if(f==='hol-name'){ ui.holidayForm.name = e.target.value; }
@@ -951,6 +1520,8 @@ function attachOnce(){
 function updateAddButtonsState(){
   const addCourseBtn = document.querySelector('[data-action="add-course"]');
   if(addCourseBtn) addCourseBtn.disabled = !ui.courseForm.name.trim() || ui.courseForm.days.length===0;
+  const addExamBtn = document.querySelector('[data-action="add-exam"]');
+  if(addExamBtn) addExamBtn.disabled = !ui.examForm.courseId || !ui.examForm.date;
   const addHolBtn = document.querySelector('[data-action="add-holiday"]');
   if(addHolBtn) addHolBtn.disabled = !ui.holidayForm.date || !ui.holidayForm.name.trim();
 }
@@ -963,6 +1534,7 @@ function shiftMonth(delta){
 
 /* ================= INIT ================= */
 startSync();
+setTimeout(()=>{ if(!configLoaded || !attendanceLoaded) render(); }, 8500);
 </script>
 </body>
 </html>
